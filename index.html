@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>IEATD — Rebrand Demo</title>
+
+    <!-- Tailwind CDN (fast demo). For production: compile Tailwind to reduce CSS size -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700&family=Poppins:wght@400;600&family=Noto+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+      /* -------------------------
+         Design tokens (light + dark)
+         ------------------------- */
+      :root{
+        /* Light theme */
+        --color-primary: #1C1C1C;    /* dark neutral for text & headings */
+        --color-accent:  #7A2F2F;    /* main accent (muted burgundy) */
+        --color-bg:      #F7F4EE;    /* page background */
+        --color-surface: #FFFFFF;    /* card/bg surface */
+        --color-text:    #222222;    /* primary text */
+        --color-muted:   #6B7280;    /* muted text */
+        --color-success: #1F8A70;
+        --radius: 12px;
+      }
+
+      /* Dark theme variables will override when .dark is on <html> */
+      html.dark {
+        --color-primary: #E6E6E6;
+        --color-accent:  #7A2F2F;    /* keep same hue for identity */
+        --color-bg:      #0b0b0f;
+        --color-surface: #0f1724;
+        --color-text:    #E6E6E6;
+        --color-muted:   #9CA3AF;
+        --color-success: #2DD4BF;
+      }
+
+      /* Small layout defaults */
+      body {
+        margin:0;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: "Noto Sans Arabic", "Almarai", "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+      }
+
+      /* Generic surface */
+      .surface {
+        background: var(--color-surface);
+      }
+
+      /* Ensure interactive elements visible in both themes */
+      .btn-accent { background: var(--color-accent); color: white; }
+      .text-accent { color: var(--color-accent); }
+      .border-accent { border-color: var(--color-accent); }
+
+      /* Suggestions dropdown */
+      .suggestion-item:hover { background: rgba(0,0,0,0.03); }
+      html.dark .suggestion-item:hover { background: rgba(255,255,255,0.03); }
+
+      /* Modal backdrop */
+      .backdrop { background: rgba(0,0,0,0.45); }
+
+      /* small RTL helper if needed */
+      [dir="rtl"] .ltr { direction: ltr; text-align: left; }
+    </style>
+  </head>
+
+  <body>
+    <!-- ========================= Root container ========================= -->
+    <div id="app" class="min-h-screen">
+
+      <!-- Header -->
+      <header class="sticky top-0 z-40 surface/70 backdrop-blur-sm border-b" style="border-color: rgba(0,0,0,0.06);">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <!-- Logo -->
+            <a href="#home" class="flex items-center gap-3" aria-label="IEATD Home">
+              <div id="brand-square" class="w-10 h-10 rounded-md flex items-center justify-center text-white font-bold" style="background:var(--color-primary)">IE</div>
+              <div>
+                <div id="brand-name" class="text-[14px] font-semibold" style="color:var(--color-primary)">IEATD</div>
+                <div id="brand-sub" class="text-xs" style="color:var(--color-muted)">تعليم مهني معتمد</div>
+              </div>
+            </a>
+
+            <!-- Nav -->
+            <nav class="hidden md:flex gap-4 ml-6" aria-label="Primary">
+              <a href="#home" id="nav-home" class="text-sm hover:text-accent">الصفحة الرئيسية</a>
+              <a href="#programs" id="nav-programs" class="text-sm hover:text-accent">البرامج</a>
+              <a href="#b2b" id="nav-b2b" class="text-sm hover:text-accent">للحكومات</a>
+            </nav>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <!-- Search w/ suggestions -->
+            <div class="hidden sm:block relative">
+              <label class="sr-only" for="global-search">بحث</label>
+              <div class="flex items-center rounded-md overflow-hidden shadow-sm" style="min-width:320px; border:1px solid rgba(0,0,0,0.06); background: var(--color-surface);">
+                <input id="global-search" class="px-3 py-2 w-full text-sm bg-transparent outline-none" placeholder="ابحث عن كورس أو شهادة..." />
+                <button id="search-btn" class="px-4 py-2 text-sm btn-accent">ابحث</button>
+              </div>
+
+              <!-- Suggestions -->
+              <ul id="suggestions" class="absolute mt-1 right-0 left-0 rounded-md shadow z-50 overflow-hidden" style="display:none; background:var(--color-surface); border:1px solid rgba(0,0,0,0.06)">
+                <!-- dynamically filled -->
+              </ul>
+            </div>
+
+            <!-- Language toggle -->
+            <button id="lang-toggle" class="text-xs border rounded px-3 py-1" aria-pressed="false">EN</button>
+
+            <!-- Dark mode -->
+            <button id="theme-toggle" class="text-xs border rounded px-3 py-1">داكن</button>
+
+            <!-- Sign up CTA -->
+            <a id="cta-signup" class="hidden md:inline-block px-4 py-2 rounded text-white btn-accent" href="#signup">سجّل الآن</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- HERO -->
+      <section id="home" class="py-14">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
+          <!-- left -->
+          <div class="flex-1">
+            <h1 id="hero-title" class="text-3xl md:text-4xl font-extrabold mb-4" style="color:var(--color-primary); font-family: 'Almarai',sans-serif">مهارات معتمدة — تؤهلك لسوق العمل الخليجي</h1>
+            <p id="hero-sub" class="text-[15px] mb-6 max-w-xl" style="color:var(--color-text)">برامج قصيرة ومكثفة مع شهادات معترف بها محليًا. سجّل اليوم وابدأ التدريب خلال أيام.</p>
+
+            <div class="flex gap-3">
+              <button id="start-btn" class="px-6 py-3 rounded-md shadow inline-flex items-center gap-2 btn-accent">ابدأ الآن</button>
+              <a id="browse-btn" href="#programs" class="px-5 py-3 rounded-md border inline-flex items-center gap-2" style="border-color:var(--color-primary); color:var(--color-primary)">استعرض البرامج</a>
+            </div>
+
+            <div class="mt-6 flex items-center gap-4 text-sm" style="color:var(--color-muted)">
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span id="proof-whatsapp">دعم مباشر عبر WhatsApp</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="1.5"/></svg>
+                <span id="proof-cert">شهادات معتمدة محليًا</span>
+              </div>
+            </div>
+
+            <!-- Testimonials -->
+            <div id="testimonials" class="mt-8 rounded-lg p-4 shadow-sm surface">
+              <div id="testi-label" class="text-sm" style="color:var(--color-muted)">آراء المتدربين</div>
+              <div id="testi-text" class="mt-3 italic"></div>
+              <div id="testi-author" class="mt-2 text-xs font-semibold"></div>
+            </div>
+          </div>
+
+          <!-- right: featured card -->
+          <div class="flex-1">
+            <div class="rounded-2xl p-6 surface shadow" style="border:1px solid rgba(0,0,0,0.06)">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <div class="text-sm" style="color:var(--color-muted)">برنامج مميز</div>
+                  <div class="font-semibold text-lg">مهارات الأخصائي النفسي المحترف</div>
+                </div>
+                <div class="text-sm px-3 py-1 rounded" style="background:rgba(122,47,47,0.12); color:var(--color-accent)">معتمد</div>
+              </div>
+
+              <div class="h-40 rounded-lg mb-4 flex items-end p-4" style="background-image:linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.01))">
+                <div>
+                  <div class="text-sm">مدة: 8 أسابيع</div>
+                  <div class="text-xs">بداية قريبة — مكان محدود</div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="text-sm" style="color:var(--color-muted)">مدرب: د. سارة</div>
+                <button id="feature-enroll" class="px-3 py-2 btn-accent rounded">سجل الآن</button>
+              </div>
+            </div>
+
+            <div class="mt-4 text-xs" style="color:var(--color-muted)">مثال واجهة عرض كورس — استبدل بالصورة الحقيقية</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filters -->
+      <section class="py-6 border-t surface" style="border-color: rgba(0,0,0,0.04)">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <label class="text-sm">التصنيف</label>
+            <select id="filter-category" class="border rounded px-3 py-2">
+              <!-- filled by JS -->
+            </select>
+
+            <label class="text-sm">الدولة</label>
+            <select id="filter-country" class="border rounded px-3 py-2">
+              <!-- filled by JS -->
+            </select>
+
+            <button id="clear-filters" class="text-sm px-3 py-2 border rounded">مسح الفلاتر</button>
+          </div>
+
+          <div id="results-count" class="text-sm" style="color:var(--color-muted)"></div>
+        </div>
+      </section>
+
+      <!-- Programs grid -->
+      <section id="programs" class="py-10">
+        <div class="max-w-6xl mx-auto px-4">
+          <h3 id="programs-title" class="text-xl font-semibold mb-6">برامج مميزة ومعتمدة</h3>
+          <div id="programs-grid" class="grid md:grid-cols-3 gap-6">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- B2B -->
+      <section id="b2b" class="py-12 surface border-t" style="border-color: rgba(0,0,0,0.04)">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-6">
+          <div class="flex-1">
+            <h3 class="text-2xl font-semibold">حلول مخصصة للجهات الحكومية والشركات</h3>
+            <p class="text-sm mt-2" style="color:var(--color-muted)">بوابات تدريب للموظفين، تقارير أداء، وتدريبات معتمدة تناسب متطلبات الجهات</p>
+            <div class="mt-4 flex gap-3">
+              <button class="px-4 py-2 btn-accent rounded text-white">اطلب عرضًا</button>
+              <button id="contact-open" class="px-4 py-2 border rounded" style="border-color:var(--color-primary); color:var(--color-primary)">تواصل معنا</button>
+            </div>
+          </div>
+
+          <div class="flex-1 w-full">
+            <div class="grid grid-cols-3 gap-3">
+              <div class="p-5 rounded-xl border" style="background:var(--color-bg)">
+                <div class="text-2xl font-bold text-[var(--color-primary)]">95%</div>
+                <div class="text-xs" style="color:var(--color-muted)">رضا المتعلمين</div>
+              </div>
+              <div class="p-5 rounded-xl border" style="background:var(--color-bg)">
+                <div class="text-2xl font-bold text-[var(--color-primary)]">30k+</div>
+                <div class="text-xs" style="color:var(--color-muted)">خريجون</div>
+              </div>
+              <div class="p-5 rounded-xl border" style="background:var(--color-bg)">
+                <div class="text-2xl font-bold text-[var(--color-primary)]">50+</div>
+                <div class="text-xs" style="color:var(--color-muted)">شريك</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-10 border-t">
+        <div class="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-6 text-sm">
+          <div>
+            <div class="font-semibold mb-2">IEATD</div>
+            <p class="text-sm" style="color:var(--color-muted)">تعليم مهني معتمد موجه لسوق الخليج.</p>
+          </div>
+          <div>
+            <div class="font-semibold mb-2">روابط</div>
+            <ul class="space-y-1">
+              <li><a href="#programs" class="hover:text-accent">البرامج</a></li>
+              <li><a href="#b2b" class="hover:text-accent">حلول الشركات</a></li>
+              <li><a href="#help" class="hover:text-accent">المساعدة</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="font-semibold mb-2">تواصل</div>
+            <ul class="space-y-1">
+              <li><a href="mailto:hello@ieatd.com" class="hover:text-accent">hello@ieatd.com</a></li>
+              <li><a href="https://wa.me/0000000000" target="_blank" rel="noreferrer" class="hover:text-accent">WhatsApp</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="text-xs text-gray-500 text-center pb-6">© <span id="year"></span> IEATD. All Rights Reserved.</div>
+      </footer>
+
+      <!-- Floating WhatsApp -->
+      <a href="https://wa.me/0000000000" target="_blank" rel="noreferrer" aria-label="WhatsApp" class="fixed bottom-4 right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-lg" style="background:var(--color-success); color:white">WA</a>
+    </div>
+
+    <!-- ========================= Modals & overlays ========================= -->
+    <!-- Newsletter modal -->
+    <div id="modal-newsletter" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center backdrop">
+      <div class="bg-white dark:bg-surface rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-start">
+          <h4 class="text-lg font-semibold">اشترك في النشرة</h4>
+          <button id="newsletter-close" class="text-sm">×</button>
+        </div>
+        <p class="text-sm mt-2" style="color:var(--color-muted)">احصل على أحدث الدورات والعروض مباشرةً في بريدك.</p>
+        <div class="mt-4 flex gap-2">
+          <input id="newsletter-email" class="flex-1 border rounded px-3 py-2" placeholder="بريدك الإلكتروني" />
+          <button id="newsletter-submit" class="px-4 py-2 btn-accent rounded">اشترك</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course modal -->
+    <div id="modal-course" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center backdrop">
+      <div class="bg-white dark:bg-surface rounded-lg p-6 w-full max-w-2xl">
+        <div class="flex justify-between items-start">
+          <h4 id="course-title" class="text-lg font-semibold">Course title</h4>
+          <button id="course-close" class="text-sm">×</button>
+        </div>
+        <div class="mt-3 grid md:grid-cols-2 gap-4">
+          <div>
+            <div id="course-meta" class="text-sm text-muted">Provider • Country</div>
+            <p id="course-desc" class="mt-3 text-sm">وصف موجز للبرنامج.</p>
+            <ul id="course-points" class="mt-3 list-disc list-inside text-sm"></ul>
+          </div>
+          <div>
+            <div class="rounded p-3" style="background:var(--color-bg)">
+              <div class="text-sm">التكلفة</div>
+              <div id="course-price" class="text-xl font-bold mt-2">₪199</div>
+              <div class="mt-4">
+                <button id="course-enroll" class="px-4 py-2 btn-accent text-white rounded">سجل الآن</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact modal -->
+    <div id="modal-contact" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center backdrop">
+      <form id="contact-form" class="bg-white dark:bg-surface rounded-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-start">
+          <h4 class="text-lg font-semibold">تواصل معنا</h4>
+          <button type="button" id="contact-close" class="text-sm">×</button>
+        </div>
+        <div class="mt-3">
+          <label class="text-sm">الاسم</label>
+          <input required id="contact-name" class="w-full border rounded px-3 py-2 mt-1" />
+        </div>
+        <div class="mt-3">
+          <label class="text-sm">البريد الإلكتروني</label>
+          <input required id="contact-email" type="email" class="w-full border rounded px-3 py-2 mt-1" />
+        </div>
+        <div class="mt-3">
+          <label class="text-sm">الرسالة</label>
+          <textarea required id="contact-message" class="w-full border rounded px-3 py-2 mt-1" rows="4"></textarea>
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+          <button type="button" id="contact-cancel" class="px-4 py-2 border rounded">إلغاء</button>
+          <button type="submit" class="px-4 py-2 btn-accent text-white rounded">أرسل</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ========================= Scripts (logic) ========================= -->
+    <script>
+      /**************************************************************
+       * Single-file JS app that reproduces the React component
+       * - stores preferences in localStorage: ieatd_dark, ieatd_lang, ieatd_seen_newsletter
+       * - features: filters, search suggestions, newsletter modal, course modal, contact modal,
+       *   testimonials auto-rotate, dark-mode toggle, language toggle
+       **************************************************************/
+
+      (function(){
+        /* --- Data (same as React version) --- */
+        const COURSES = [
+          { id: 1, title_ar: 'دورة إدارة المشاريع الاحترافية', title_en: 'Professional Project Management', provider: 'University Partner', country: 'Saudi Arabia', badge: 'معتمد', category: 'الإدارة' },
+          { id: 2, title_ar: 'مهارات الأخصائي النفسي المحترف', title_en: 'Clinical Psychology Practitioner', provider: 'IEATD', country: 'UAE', badge: 'معتمد', category: 'الصحة النفسية' },
+          { id: 3, title_ar: 'تحليل البيانات للمبتدئين', title_en: 'Data Analysis for Beginners', provider: 'Global', country: 'Qatar', badge: 'شهادة معتمدة', category: 'تحليل البيانات' },
+          { id: 4, title_ar: 'التطوير المهني القيادي', title_en: 'Leadership Professional Development', provider: 'Partner Uni', country: 'Saudi Arabia', badge: 'معتمد', category: 'التطوير المهني' },
+        ];
+        const TESTIMONIALS = [
+          { id:1, text_ar:'تجربة ممتازة — الأنسب لتطوير المهارات العملية.', text_en:'Excellent experience — practical and career-focused.', author:'Aisha, Riyadh' },
+          { id:2, text_ar:'المحتوى معتمد وجودة المدربين عالية.', text_en:'Accredited content and high-quality instructors.', author:'Omar, Dubai' },
+          { id:3, text_ar:'شهادات ساعدتني في الحصول على وظيفة.', text_en:'The certificates helped me land a job.', author:'Fatima, Doha' },
+        ];
+        const CATEGORIES = ['all','التطوير المهني','الصحة النفسية','الإدارة','تحليل البيانات'];
+        const COUNTRIES = ['all','Saudi Arabia','UAE','Qatar','Global'];
+
+        /* --- State --- */
+        let LANG = (localStorage.getItem('ieatd_lang') || 'ar');
+        let DARK = (localStorage.getItem('ieatd_dark') === '1');
+        let QUERY = '';
+        let SELECTED_CATEGORY = 'all';
+        let SELECTED_COUNTRY = 'all';
+        let TESTI_INDEX = 0;
+        let SUGGESTIONS_VISIBLE = false;
+
+        /* --- Elements cache --- */
+        const el = id => document.getElementById(id);
+        const suggestionsEl = el('suggestions');
+        const searchInput = el('global-search');
+        const resultsCount = el('results-count');
+        const programsGrid = el('programs-grid');
+        const categorySelect = el('filter-category');
+        const countrySelect = el('filter-country');
+        const yearEl = el('year');
+
+        /* --- Init --- */
+        function init(){
+          // set initial theme & lang
+          applyTheme(DARK);
+          applyLang(LANG);
+
+          // fill selects
+          CATEGORIES.forEach(c => {
+            const o = document.createElement('option'); o.value=c; o.textContent=c; categorySelect.appendChild(o);
+          });
+          COUNTRIES.forEach(c => {
+            const o = document.createElement('option'); o.value=c; o.textContent=c; countrySelect.appendChild(o);
+          });
+
+          // render initial programs + testimonials
+          renderPrograms();
+          renderTestimonials();
+
+          // wire events
+          setupEvents();
+
+          // show newsletter modal once if not seen
+          try {
+            if (!localStorage.getItem('ieatd_seen_newsletter')) {
+              setTimeout(()=> openNewsletter(), 2000);
+            }
+          } catch(e){}
+
+          // set year
+          if(yearEl) yearEl.textContent = new Date().getFullYear();
+
+          // testimonials autoplay
+          setInterval(()=> {
+            TESTI_INDEX = (TESTI_INDEX + 1) % TESTIMONIALS.length;
+            renderTestimonials();
+          }, 5000);
+        }
+
+        /* --- Renderers --- */
+        function renderTestimonials(){
+          const txt = TESTIMONIALS[TESTI_INDEX][ LANG === 'ar' ? 'text_ar' : 'text_en' ];
+          const author = TESTIMONIALS[TESTI_INDEX].author;
+          el('testi-text').textContent = txt;
+          el('testi-author').textContent = '— ' + author;
+        }
+
+        function filterCourses(){
+          const q = QUERY.trim().toLowerCase();
+          return COURSES.filter(c => {
+            const text = (LANG === 'ar' ? c.title_ar : c.title_en).toLowerCase();
+            const matchQ = !q || text.includes(q);
+            const matchCat = (SELECTED_CATEGORY === 'all') || (c.category === SELECTED_CATEGORY);
+            const matchCountry = (SELECTED_COUNTRY === 'all') || (c.country === SELECTED_COUNTRY) || (SELECTED_COUNTRY === 'Global' && c.country === 'Global');
+            return matchQ && matchCat && matchCountry;
+          });
+        }
+
+        function renderPrograms(){
+          const list = filterCourses();
+          programsGrid.innerHTML = '';
+          resultsCount.textContent = `${list.length} ${LANG === 'ar' ? 'نتيجة' : 'results'}`;
+          list.forEach(course => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition cursor-pointer surface';
+            card.onclick = ()=> openCourse(course);
+            const inner = `
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="text-sm" style="color:var(--color-muted)">${course.provider} • ${course.country}</div>
+                  <div class="font-semibold text-lg mt-2">${LANG === 'ar' ? course.title_ar : course.title_en}</div>
+                </div>
+                <div class="text-sm px-3 py-1 rounded-full" style="background: rgba(31,138,112,0.08); color:var(--color-success)">${course.badge}</div>
+              </div>
+              <div class="mt-4 flex items-center justify-between">
+                <div class="text-sm" style="color:var(--color-muted)">${LANG === 'ar' ? 'مدة: 6 أسابيع' : 'Duration: 6 weeks'}</div>
+                <a class="px-3 py-2 btn-accent text-white rounded" href="#syllabus" onclick="event.stopPropagation()">${LANG === 'ar' ? 'عرض المنهاج' : 'View Syllabus'}</a>
+              </div>
+            `;
+            card.innerHTML = inner;
+            programsGrid.appendChild(card);
+          });
+        }
+
+        /* --- UI actions --- */
+        function applyLang(lang){
+          LANG = lang;
+          try { localStorage.setItem('ieatd_lang', LANG); } catch(e){}
+          document.documentElement.lang = LANG;
+          document.documentElement.dir = (LANG === 'ar') ? 'rtl' : 'ltr';
+          // update some text fragments
+          el('lang-toggle').textContent = LANG === 'ar' ? 'EN' : 'العربية';
+          el('hero-title').textContent = LANG === 'ar' ? 'مهارات معتمدة — تؤهلك لسوق العمل الخليجي' : 'Accredited skills that get you hired in the Gulf';
+          el('hero-sub').textContent = LANG === 'ar' ? 'برامج قصيرة ومكثفة مع شهادات معترف بها محليًا. سجّل اليوم وابدأ التدريب خلال أيام.' : 'Short, intensive programs with locally recognized certificates. Enroll today and start within days.';
+          el('start-btn').textContent = LANG === 'ar' ? 'ابدأ الآن' : 'Get Started';
+          el('browse-btn').textContent = LANG === 'ar' ? 'استعرض البرامج' : 'Browse Programs';
+          el('proof-whatsapp').textContent = LANG === 'ar' ? 'دعم مباشر عبر WhatsApp' : 'Direct support via WhatsApp';
+          el('proof-cert').textContent = LANG === 'ar' ? 'شهادات معتمدة محليًا' : 'Locally accredited certificates';
+          el('programs-title').textContent = LANG === 'ar' ? 'برامج مميزة ومعتمدة' : 'Featured Accredited Programs';
+          el('cta-signup').textContent = LANG === 'ar' ? 'سجّل الآن' : 'Sign up';
+          // re-render dynamic lists
+          renderPrograms();
+          renderTestimonials();
+        }
+
+        function applyTheme(dark){
+          DARK = !!dark;
+          try { localStorage.setItem('ieatd_dark', DARK ? '1' : '0') } catch(e){}
+          if (DARK) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
+          el('theme-toggle').textContent = DARK ? (LANG==='ar' ? 'نهاري' : 'Light') : (LANG==='ar' ? 'داكن' : 'Dark');
+          // update brand square contrast for visibility (light bg vs dark bg)
+          const brandSquare = document.getElementById('brand-square');
+          if (brandSquare) {
+            brandSquare.style.background = DARK ? 'var(--color-accent)' : 'var(--color-primary)';
+            brandSquare.style.color = '#fff';
+          }
+        }
+
+        /* --- Modals --- */
+        function openNewsletter(){
+          const modal = el('modal-newsletter'); if(!modal) return;
+          modal.style.display = 'flex';
+        }
+        function closeNewsletter(){
+          const modal = el('modal-newsletter'); if(!modal) return;
+          modal.style.display = 'none';
+          try { localStorage.setItem('ieatd_seen_newsletter','1') } catch(e){}
+        }
+
+        function openCourse(course){
+          const modal = el('modal-course'); if(!modal) return;
+          el('course-title').textContent = LANG === 'ar' ? course.title_ar : course.title_en;
+          el('course-meta').textContent = `${course.provider} • ${course.country}`;
+          el('course-desc').textContent = LANG === 'ar' ? 'وصف موجز للبرنامج، أهدافه، لمن يناسب.' : 'Short program summary, outcomes, who it suits.';
+          el('course-price').textContent = LANG === 'ar' ? '₪199' : '$199';
+          // points
+          const points = ['محتوى عملي مع دروس مسجلة','جلسات مباشرة مع المدرب','شهادة معتمدة'];
+          const list = el('course-points'); list.innerHTML = '';
+          points.forEach(p => {
+            const li = document.createElement('li'); li.textContent = LANG === 'ar' ? p : (p === points[0] ? 'Hands-on content with recorded lessons' : p === points[1] ? 'Live Q&A sessions with instructor' : 'Accredited certificate');
+            list.appendChild(li);
+          });
+          modal.style.display = 'flex';
+        }
+        function closeCourse(){ el('modal-course').style.display = 'none'; }
+
+        function openContact(){ el('modal-contact').style.display = 'flex'; }
+        function closeContact(){ el('modal-contact').style.display = 'none'; }
+
+        /* --- Suggestions logic --- */
+        function updateSuggestions(){
+          const q = searchInput.value.trim().toLowerCase();
+          if(!q){ suggestionsEl.style.display = 'none'; return; }
+          const list = COURSES
+            .map(c => ({id:c.id, text: (LANG === 'ar' ? c.title_ar : c.title_en)}))
+            .filter(i => i.text.toLowerCase().includes(q))
+            .slice(0,6);
+          suggestionsEl.innerHTML = '';
+          list.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'px-3 py-2 cursor-pointer suggestion-item';
+            li.textContent = item.text;
+            li.onmousedown = (e) => { // use mousedown to avoid blur race
+              searchInput.value = item.text;
+              QUERY = item.text;
+              suggestionsEl.style.display = 'none';
+              renderPrograms();
+            };
+            suggestionsEl.appendChild(li);
+          });
+          suggestionsEl.style.display = list.length ? 'block' : 'none';
+        }
+
+        /* --- Events wiring --- */
+        function setupEvents(){
+          // search input
+          searchInput.addEventListener('input', (e)=> {
+            QUERY = e.target.value;
+            updateSuggestions();
+            renderPrograms();
+          });
+          searchInput.addEventListener('focus', ()=> updateSuggestions());
+          searchInput.addEventListener('blur', ()=> setTimeout(()=> { suggestionsEl.style.display = 'none'; }, 150));
+
+          // search button
+          el('search-btn').addEventListener('click', ()=> {
+            QUERY = searchInput.value;
+            renderPrograms();
+          });
+
+          // lang toggle
+          el('lang-toggle').addEventListener('click', ()=> applyLang(LANG === 'ar' ? 'en' : 'ar'));
+
+          // theme toggle
+          el('theme-toggle').addEventListener('click', ()=> applyTheme(!DARK));
+
+          // start button opens newsletter for demo
+          el('start-btn').addEventListener('click', ()=> openNewsletter());
+
+          // feature enroll opens course modal for the second course (demo)
+          el('feature-enroll').addEventListener('click', ()=> openCourse(COURSES[1]));
+
+          // filters
+          categorySelect.addEventListener('change', (e)=> { SELECTED_CATEGORY = e.target.value; renderPrograms(); });
+          countrySelect.addEventListener('change', (e)=> { SELECTED_COUNTRY = e.target.value; renderPrograms(); });
+          el('clear-filters').addEventListener('click', ()=> {
+            SELECTED_CATEGORY = 'all'; SELECTED_COUNTRY = 'all'; QUERY = ''; searchInput.value = '';
+            categorySelect.value = 'all'; countrySelect.value = 'all'; renderPrograms();
+          });
+
+          // newsletter
+          el('newsletter-close').addEventListener('click', closeNewsletter);
+          el('newsletter-submit').addEventListener('click', ()=> {
+            try { localStorage.setItem('ieatd_seen_newsletter','1'); } catch(e){}
+            closeNewsletter();
+            alert(LANG === 'ar' ? 'شكرًا! تم التسجيل في النشرة.' : 'Thanks! Newsletter registered.');
+          });
+
+          // course modal close / enroll
+          el('course-close').addEventListener('click', closeCourse);
+          el('course-enroll').addEventListener('click', ()=> {
+            alert(LANG === 'ar' ? 'تم تسجيلك! (محاكاة)' : 'You are enrolled! (mock)');
+            closeCourse();
+          });
+
+          // contact modal
+          el('contact-open').addEventListener('click', openContact);
+          el('contact-close').addEventListener('click', closeContact);
+          el('contact-cancel').addEventListener('click', closeContact);
+          el('contact-form').addEventListener('submit', function(e){
+            e.preventDefault();
+            closeContact();
+            alert(LANG === 'ar' ? 'تم إرسال رسالتك — سنتواصل معك قريبًا' : 'Your message was sent — we will contact you soon');
+          });
+
+          // newsletter close on clicking backdrop (optional)
+          document.querySelectorAll('[id^=modal-]').forEach(m => {
+            m.addEventListener('click', (ev) => {
+              if (ev.target === m) {
+                m.style.display = 'none';
+              }
+            });
+          });
+        }
+
+        // start app
+        init();
+
+      })();
+    </script>
+  </body>
+</html>
